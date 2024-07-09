@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors');
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 5000
 
@@ -30,6 +30,7 @@ async function run() {
     //await client.db("admin").command({ ping: 1 });
 
     const userCollections = client.db("taskManager").collection("users");
+    const taskCollections = client.db("taskManager").collection("task");
 
     app.post("/user", async (req, res) => {
         const user = req.body;
@@ -40,6 +41,36 @@ async function run() {
     app.get('/users', async (req, res) => {
         const users = await userCollections.find().toArray();
         res.send(users);
+    })
+
+    app.post('/task', async (req, res) => {
+        const task = req.body;
+        const result = await taskCollections.insertOne(task);
+        res.send(result);
+
+    })
+
+    app.get('/task', async (req, res) => {
+        const email = req.query.email;
+        let query = {};
+        if (email) {
+            query = { email : email };
+        }
+        const result = await taskCollections.find(query).toArray();
+        res.send(result);
+    })
+
+    app.patch('/task/:id', async (req, res) => {
+      const id = req.params.id;
+      const { status } = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: status, 
+        },
+      };
+      const result = await taskCollections.updateOne(filter, updateDoc);
+      res.send(result);
     })
 
 
