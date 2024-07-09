@@ -116,24 +116,21 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/userAssignTask/:id", async (req, res) => {
-      const userId = req.params.id;
-      console.log("Requested User ID:", userId);
-      
+    // Route to get tasks assigned to a specific user
+    app.get("/userTasks/:userId", async (req, res) => {
+      const userId = req.params.userId;
+
       try {
-        const tasks = await taskCollections.find({ "users.id": userId }).toArray();
-        console.log(tasks);
+        const tasks = await taskCollections
+          .find({ "users.id": userId })
+          .toArray();
+        res.json(tasks);
       } catch (err) {
-        console.error('Error fetching tasks', err);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error("Error fetching tasks:", err);
+        res.status(500).json({ error: "Internal server error" });
       }
     });
 
-    // async function fetchUserIds() {
-      
-    // }
-
-    // fetchUserIds();
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
